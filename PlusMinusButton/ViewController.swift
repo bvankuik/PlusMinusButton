@@ -8,67 +8,82 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-    let plusButton = UIButton()
-    let minusButton = UIButton()
-    let resultLabel = UILabel()
+class PlusMinusButton: UIView {
+    private let plusButton = UIButton()
+    private let minusButton = UIButton()
+    private let resultLabel = UILabel()
     var result = 0
 
-    override func viewDidLayoutSubviews() {
-        let radius = self.resultLabel.frame.height / 2.0
-        self.plusButton.layer.cornerRadius = radius
-        self.minusButton.layer.cornerRadius = radius
-    }
-    
     @objc func buttonAction(_ sender: UIButton) {
         print(sender.tag)
         self.result += sender.tag
         self.resultLabel.text = String(describing: self.result)
     }
 
-    override func viewDidLoad() {
-        self.plusButton.translatesAutoresizingMaskIntoConstraints = false
-        self.plusButton.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
-        self.plusButton.tag = 1
-        self.plusButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
-        self.plusButton.setTitle("+", for: .normal)
-        self.plusButton.titleLabel?.textColor = .white
-        self.plusButton.addTarget(self, action: #selector(buttonAction(_:)), for: .touchUpInside)
-        self.view.addSubview(self.plusButton)
+    override func layoutSubviews() {
+        let radius = self.resultLabel.frame.height / 2.0
+        self.plusButton.layer.cornerRadius = radius
+        self.minusButton.layer.cornerRadius = radius
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         
-        self.minusButton.translatesAutoresizingMaskIntoConstraints = false
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.distribution = .fillEqually
+        self.addSubview(stackView)
+        
         self.minusButton.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
         self.minusButton.tag = -1
-        self.minusButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
         self.minusButton.setTitle("-", for: .normal)
-        self.minusButton.titleLabel?.textColor = .white
-        self.minusButton.addTarget(self, action: #selector(buttonAction(_:)), for: .touchUpInside)
-        self.view.addSubview(self.minusButton)
+        stackView.addArrangedSubview(self.minusButton)
 
-        self.resultLabel.translatesAutoresizingMaskIntoConstraints = false
         self.resultLabel.font = UIFont.preferredFont(forTextStyle: .headline)
         self.resultLabel.text = String(describing: self.result)
         self.resultLabel.textColor = .white
         self.resultLabel.textAlignment = .center
-        self.view.addSubview(self.resultLabel)
+        stackView.addArrangedSubview(self.resultLabel)
+
+        self.plusButton.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
+        self.plusButton.tag = 1
+        self.plusButton.setTitle("+", for: .normal)
+        stackView.addArrangedSubview(self.plusButton)
+        
+        [self.plusButton, self.minusButton].forEach {
+            $0.titleLabel?.font = UIFont.preferredFont(forTextStyle: .headline)
+            $0.titleLabel?.textColor = .white
+            $0.addTarget(self, action: #selector(buttonAction(_:)), for: .touchUpInside)
+        }
         
         [self.plusButton, self.minusButton, self.resultLabel].forEach {
             $0.backgroundColor = .gray
         }
-
+        
         let constraints = [
-            self.minusButton.widthAnchor.constraint(equalTo: self.plusButton.widthAnchor),
-            self.minusButton.rightAnchor.constraint(equalTo: self.resultLabel.leftAnchor),
-            self.minusButton.centerYAnchor.constraint(equalTo: self.resultLabel.centerYAnchor),
-            
-            self.resultLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
-            self.resultLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 50),
-            self.resultLabel.heightAnchor.constraint(equalTo: self.minusButton.heightAnchor),
-            self.resultLabel.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
-            
-            self.plusButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
-            self.plusButton.leftAnchor.constraint(equalTo: self.resultLabel.rightAnchor),
-            self.plusButton.centerYAnchor.constraint(equalTo: self.resultLabel.centerYAnchor),
+            stackView.leftAnchor.constraint(equalTo: self.leftAnchor),
+            stackView.topAnchor.constraint(equalTo: self.topAnchor),
+            stackView.rightAnchor.constraint(equalTo: self.rightAnchor),
+            stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+        ]
+        self.addConstraints(constraints)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class ViewController: UIViewController {
+    override func viewDidLoad() {
+        let plusMinusButton = PlusMinusButton()
+        plusMinusButton.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(plusMinusButton)
+        
+        let constraints = [
+            plusMinusButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            plusMinusButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+            plusMinusButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 150)
         ]
         self.view.addConstraints(constraints)
     }
